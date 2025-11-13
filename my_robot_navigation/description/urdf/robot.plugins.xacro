@@ -18,7 +18,7 @@
             <commandTopic>cmd_vel</commandTopic>
             <odometryTopic>odom</odometryTopic>
             <odometryFrame>odom</odometryFrame>
-            <broadcastTF>true</broadcastTF>
+            <broadcastTF>false</broadcastTF>
 
             <alpha1>0.000</alpha1>
             <alpha2>0.000</alpha2>

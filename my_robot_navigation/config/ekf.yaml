@@ -1,0 +1,23 @@
+# ekf.yaml
+frequency: 50
+two_d_mode: true
+
+odom_frame: odom
+base_link_frame: base_link
+world_frame: odom
+
+# --- Вход 1: Одометрия от колес ---
+odom0: /shoddy/odom
+odom0_config: [true,  true,  false,  # Используем X, Y, не Z
+               false, false, false,  # Не используем Roll, Pitch, Yaw
+               false, false, false,  # Не используем линейные скорости
+               false, false, true]   # Не используем угл. скорости, кроме Yaw
+odom0_differential: false
+
+# --- Вход 2: IMU ---
+imu0: /imu/data
+imu0_config: [false, false, false,
+              false, false, true,   # НЕ используем ориентацию, кроме Yaw
+              false, false, false,
+              false, false, true]   # Используем угловую скорость Yaw
+imu0_differential: false

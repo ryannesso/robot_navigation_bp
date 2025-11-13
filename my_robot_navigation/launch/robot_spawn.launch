@@ -1,17 +1,23 @@
 <launch>
+  <!-- ======================= АРГУМЕНТЫ ======================= -->
   <arg name="use_gui" default="true"/>
   <arg name="paused" default="false"/>
   <arg name="world_file" default="$(find my_robot_navigation)/gazebo/worlds/empty.world"/>
+  
+  <!-- Начальная позиция робота -->
   <arg name="x" default="0.061859"/>
   <arg name="y" default="4.097681"/>
   <arg name="z" default="0.164524"/>
   <arg name="yaw" default="-1.566293"/>
-  <arg name="odom_topic" default="/shoddy/odom"/>
-  <arg name="laser_topic" default="scan"/>
+
+  <!-- Модель робота -->
   <arg name="model" default="$(find my_robot_navigation)/description/urdf/robot.urdf.xacro"/>
 
+  <!-- ======================= ГЛАВНЫЕ НАСТРОЙКИ ======================= -->
+  <!-- Использование симуляционного времени ОБЯЗАТЕЛЬНО для Gazebo -->
   <param name="/use_sim_time" value="true"/>
 
+  <!-- ======================= ЗАПУСК СИМУЛЯЦИИ GAZEBO ======================= -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world_file)"/>
     <arg name="paused" value="$(arg paused)"/>
@@ -19,11 +25,63 @@
     <arg name="gui" value="$(arg use_gui)"/>
   </include>
   
-  <param name="robot_description" command="$(find xacro)/xacro '$(find my_robot_navigation)/description/urdf/robot.urdf.xacro'" />
+  <!-- Загрузка и спавн модели робота -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'" />
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"
         args="-param robot_description -urdf -model my_robot -x $(arg x) -y $(arg y) -z $(arg z) -Y $(arg yaw)"
         output="screen"/>
 
+  <!-- ======================= БАЗОВЫЕ УЗЛЫ ROS ======================= -->
+  <!-- Публикует статические трансформации (base_link -> laser_link и т.д.) -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" value="30.0"/>
+  </node>
+
+  <!-- ======================= СИСТЕМА ЛОКАЛИЗАЦИИ (Сенсорное слияние) ======================= -->
+  <!-- ЭТОТ УЗЕЛ - НОВЫЙ "БОСС" ОДОМЕТРИИ. Он объединяет данные с колес и IMU. -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+    <rosparam command="load" file="$(find my_robot_navigation)/config/ekf.yaml" />
+    <!-- Выход EKF будет стандартным топиком /odom, который будут слушать все остальные -->
+    <remap from="odometry/filtered" to="odom" />
+  </node>
+  
+  <!-- ======================= СИСТЕМА КАРТОГРАФИИ (SLAM) ======================= -->
+  <!-- SLAM теперь слушает УЛУЧШЕННУЮ одометрию от EKF -->
+  <node pkg="slam_toolbox" type="async_slam_toolbox_node" name="slam_toolbox" output="screen">
+    <param name="odom_frame" value="odom"/>      
+    <param name="map_frame" value="map"/>
+    <param name="base_frame" value="base_link"/> 
+    <param name="scan_topic" value="/scan"/>     
+    <!-- ИЗМЕНЕНО: Убрали remap на /shoddy/odom. Теперь SLAM по умолчанию слушает /odom, куда публикует EKF. -->
+    <param name="use_scan_matching" value="true"/>
+    <param name="minimum_travel_distance" value="0.05"/>
+    <param name="minimum_travel_heading" value="0.05"/>
+  </node>
+
+  <!-- ======================= СИСТЕМА НАВИГАЦИИ (Move Base) ======================= -->
+  <node pkg="move_base" type="move_base" name="move_base" output="screen" launch-prefix="xterm -e">
+    <rosparam file="$(find my_robot_navigation)/config/costmap_common_params.yaml" command="load" />
+    <rosparam file="$(find my_robot_navigation)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find my_robot_navigation)/config/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find my_robot_navigation)/config/move_base_params.yaml" command="load"/>
+    <rosparam file="$(find my_robot_navigation)/config/improved_dwa_params.yaml" command="load" />
+
+    <!-- Команды скорости от move_base идут на контроллер робота -->
+    <remap from="/cmd_vel" to="/shoddy/cmd_vel"/>
+    <!-- ДОБАВЛЕНО: Явно указываем move_base слушать улучшенную одометрию от EKF -->
+    <remap from="odom" to="odom"/>
+  </node>
+
+  <!-- ======================= ИНСТРУМЕНТЫ И ВИЗУАЛИЗАЦИЯ ======================= -->
+  <node pkg="rviz" type="rviz" name="rviz" 
+        args="-d $(find my_robot_navigation)/gazebo/rviz/config.rviz" 
+        output="screen"/>
+  
+  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+    <param name="default_topic" value="/shoddy/cmd_vel"/>
+  </node>
+  
+  <!-- Вспомогательные узлы для симуляции, можно оставить как есть -->
   <param name="sphere_description" type="string" value="
     &lt;robot name=&quot;moving_sphere&quot;&gt;
       &lt;link name=&quot;base_link&quot;&gt;
@@ -44,47 +102,13 @@
       &lt;/gazebo&gt;
     &lt;/robot&gt;
   " />
-
   <node pkg="gazebo_ros" type="spawn_model" name="spawn_sphere"
         args="-param sphere_description -urdf -model moving_sphere -x 0.0 -y 0.0 -z 0.5"
         output="screen"/>
-
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
-    <param name="publish_frequency" value="30.0"/>
-  </node>
-  
   <node pkg="my_robot_navigation" type="move_sphere.py" name="move_sphere_controller" output="screen">
     <waitfor service="/gazebo/set_model_state" timeout="30.0"/>
   </node>
-  
-  <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
-    <param name="default_topic" value="/shoddy/cmd_vel"/>
-  </node>
-  
-  <node pkg="slam_toolbox" type="async_slam_toolbox_node" name="slam_toolbox" output="screen">
-    <param name="odom_frame" value="odom"/>      
-    <remap from="odom" to="/shoddy/odom"/>       
-    <param name="map_frame" value="map"/>
-    <param name="base_frame" value="base_link"/> 
-    <param name="scan_topic" value="/scan"/>     
-    <param name="use_scan_matching" value="true"/>
-    <param name="minimum_travel_distance" value="0.05"/>
-    <param name="minimum_travel_heading" value="0.05"/>
-  </node>
-
-  <node pkg="rviz" type="rviz" name="rviz" 
-        args="-d $(find my_robot_navigation)/gazebo/rviz/config.rviz" 
-        output="screen"/>
   <env name="ROSCONSOLE_CONFIG_FILE" 
      value="$(find my_robot_navigation)/config/rosconsole.conf"/>
 
-  <node pkg="move_base" type="move_base" name="move_base" output="screen" launch-prefix="xterm -e">
-    <rosparam file="$(find my_robot_navigation)/config/costmap_common_params.yaml" command="load" />
-    <rosparam file="$(find my_robot_navigation)/config/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find my_robot_navigation)/config/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find my_robot_navigation)/config/move_base_params.yaml" command="load"/>
-    <rosparam file="$(find my_robot_navigation)/config/improved_dwa_params.yaml" command="load" />
-
-    <remap from="/cmd_vel" to="/shoddy/cmd_vel"/>
-  </node>
 </launch>
