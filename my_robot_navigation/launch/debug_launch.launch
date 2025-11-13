@@ -1,0 +1,17 @@
+<!-- final.launch -->
+<launch>
+  <param name="/use_sim_time" value="true"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+  </include>
+  
+  <!-- УКАЗЫВАЕМ НА НОВЫЙ ФАЙЛ -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(find my_robot_navigation)/description/urdf/test_robot.urdf.xacro'" />
+  
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
+  
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"
+        args="-param robot_description -urdf -model shoddy_final"
+        output="screen"/>
+</launch>

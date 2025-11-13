@@ -1,0 +1,106 @@
+<sdf version='1.6'>
+  <world name='default'>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <name>building</name>
+      <uri>model://building</uri>
+      <pose>0.941157 -0.334956 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>box_z=0.5m</name>
+      <uri>model://box_z=0.5m</uri>
+      <pose>-3.26157 4.02790 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>oak_tree</name>
+      <uri>model://oak_tree</uri>
+      <pose>-2.61035 -4.32355 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>cinder_block</name>
+      <uri>model://cinder_block</uri>
+      <pose>-1.98915 4.41578 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>cardboard_box_0</name>
+      <uri>model://cardboard_box</uri>
+      <pose>0.61689 -4.93546 0.15 0 0 0</pose>
+    </include>
+    <include>
+      <name>cardboard_box_1</name>
+      <uri>model://cardboard_box</uri>
+      <pose>2.00053 -4.93546 0.15 0 0 0</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_2</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>4.10862 -1.10365 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_3</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>2.67185 2.63868 0 0 0 1.5707</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_4</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>-2.444220 10.814700 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_5</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>0.019058 4.971870 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_6</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>0.026433 8.928450 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_7</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>0.055528 15.073100 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_8</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>0.024341 0.024341 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_9</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>2.669366 10.552079 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_10</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>1.076730 3.998180 0 0 0 -0.011620</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_11</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>2.698150 6.601400 0 0 0 1.570700</pose>
+    </include>
+    <include>
+      <name>jersey_barrier_12</name>
+      <uri>model://jersey_barrier</uri>
+      <pose>2.705510 2.705510 0 0 0 1.570700</pose>
+    </include>
+    <include>
+	  <uri>model://sphere</uri>
+	  <name>moving_sphere</name>
+	  <pose>-8.356281 10.596632 0.5 0 0 0</pose> <!-- Начальная позиция: x=2, y=0, z=0.5 -->
+    </include>
+    <physics type='ode'>
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+  </world>
+</sdf>

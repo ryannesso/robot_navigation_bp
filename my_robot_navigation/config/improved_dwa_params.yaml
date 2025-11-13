@@ -1,0 +1,31 @@
+ImprovedDWALocalPlanner:
+  # Веса из статьи для избегания динамических препятствий
+  alpha: 1.5 #смотреть на цель
+  beta: 0.5 #строго придерживаться плана
+  gamma: 0.05 #выше скорость - меньше штраф
+
+  # Ограничения робота (возьмите из вашего urdf или настройте)
+  acc_lim_x: 2.0
+  acc_lim_y: 0.0
+  acc_lim_th: 2.0
+    
+  max_vel_trans: 1.0
+  min_vel_trans: 0.1
+
+  max_vel_x: 1.0
+  min_vel_x: -0.2
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+
+  max_rot_vel: 3.14
+  min_rot_vel: 0.2
+
+
+  # Параметры симуляции
+  predict_time: 1.5
+  dt: 0.1
+  robot_radius: 0.3 # ВАЖНО: Укажите радиус вашего робота!
+  forward_point_distance: 0.2
+
+  # Допуск до цели. Должен быть равен или чуть больше, чем xy_goal_tolerance в move_base
+  # xy_goal_tolerance: 0.20

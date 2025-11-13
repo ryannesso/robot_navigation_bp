@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<robot name="shoddy_final" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ПОДКЛЮЧАЕМ "ЧЕРТЕЖИ" (МАКРОСЫ) -->
+    <xacro:include filename="$(find my_robot_navigation)/description/urdf/materials.urdf.xacro"/>
+    <xacro:include filename="$(find my_robot_navigation)/description/urdf/wheel_macro.urdf.xacro"/>
+    <!-- === ИТЕРАЦИЯ 2: Подключаем чертеж для лидара === -->
+    <xacro:include filename="$(find my_robot_navigation)/description/urdf/lidar_macro.urdf.xacro"/>
+
+    <!-- ОПРЕДЕЛЯЕМ КОНСТАНТЫ -->
+    <xacro:property name="SHAFT_FRONT_X" value="0.14"/>
+    <xacro:property name="SHAFT_REAR_X" value="-0.14"/>
+    <xacro:property name="SHAFT_Z" value="-0.05"/>
+    <xacro:property name="WHEEL_Y" value="0.2"/>
+
+    <!-- ================================================================= -->
+    <!-- ===                        ШАССИ                              === -->
+    <link name="base_link">
+        <visual>
+            <geometry><box size="0.47 0.315 0.168"/></geometry>
+            <material name="Blue"/>
+        </visual>
+        <collision>
+            <geometry><box size="0.47 0.315 0.168"/></geometry>
+        </collision>
+        <inertial>
+            <mass value="30.0"/>
+            <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+        </inertial>
+    </link>
+
+    <!-- ================================================================= -->
+    <!-- ===                        КОЛЕСА                             === -->
+    <xacro:wheel_macro side="left" part="front" xyz="${SHAFT_FRONT_X} ${WHEEL_Y} ${SHAFT_Z}" parent="base_link"/>
+    <xacro:wheel_macro side="left" part="rear" xyz="${SHAFT_REAR_X} ${WHEEL_Y} ${SHAFT_Z}" parent="base_link"/>
+    <xacro:wheel_macro side="right" part="front" xyz="${SHAFT_FRONT_X} -${WHEEL_Y} ${SHAFT_Z}" parent="base_link"/>
+    <xacro:wheel_macro side="right" part="rear" xyz="${SHAFT_REAR_X} -${WHEEL_Y} ${SHAFT_Z}" parent="base_link"/>
+
+    <!-- ================================================================= -->
+    <!-- ===  ИТЕРАЦИЯ 2: Создаем лидар, используя его "чертеж" (макрос) === -->
+    <xacro:lidar_macro name="sensor_laser_link" parent="base_link"/>
+    
+    <!-- ================================================================= -->
+    <!-- ===      ПЛАГИН GAZEBO (ДЛЯ ПУБЛИКАЦИИ /JOINT_STATES)        === -->
+    <gazebo>
+        <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+            <jointName>
+                wheel_left_front_to_base_joint, 
+                wheel_left_rear_to_base_joint, 
+                wheel_right_front_to_base_joint, 
+                wheel_right_rear_to_base_joint
+                <!-- ВАЖНО: сустав лидара 'sensor_laser_joint' является 'fixed',
+                     поэтому его не нужно добавлять в этот плагин. Плагин
+                     публикует только ДВИЖУЩИЕСЯ суставы. -->
+            </jointName>
+            <updateRate>30.0</updateRate>
+        </plugin>
+    </gazebo>
+
+</robot>

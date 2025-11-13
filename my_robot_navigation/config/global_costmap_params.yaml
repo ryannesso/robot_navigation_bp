@@ -1,0 +1,53 @@
+# -------------------- global_costmap_params.yaml (ИСПРАВЛЕННАЯ ВЕРСИЯ) --------------------
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_link
+  
+  update_frequency: 20.0
+  publish_frequency: 2.0
+  static_map: false
+  rolling_window: true
+  width: 15.0
+  height: 15.0
+  resolution: 0.05 # Убедитесь, что разрешение такое же, как в local_costmap
+  transform_tolerance: 0.5
+  observation_persistence: 0.0
+  track_unknown_space: false
+
+  # ШАГ 1: Подключаем новый плагин вместо старого VoxelLayer
+  plugins:
+    - {name: obstacle_layer, type: "costmap_2d::VoxelLayer"}
+    - {name: inflation_layer,  type: "costmap_2d::InflationLayer"}
+
+  # ШАГ 2: Настраиваем наш новый слой obstacle_layer
+  obstacle_layer:
+    enabled: true
+    observation_sources: laser_scan_sensor
+    laser_scan_sensor: {
+      sensor_frame: sensor_laser_link, 
+      data_type: LaserScan, 
+      topic: /scan, 
+      marking: true, 
+      clearing: true, 
+      inf_is_valid: true
+    }
+
+    # --- КЛЮЧЕВЫЕ ПАРАМЕТРЫ STVL ---
+
+    # Как долго "призрак" препятствия будет существовать, прежде чем исчезнуть.
+    # 0.5 = через полсекунды после того, как объект уехал, его след полностью сотрется.
+    # Это главный параметр для борьбы со следами!
+    voxel_decay: 0.5
+
+    # Как долго слой будет "помнить" препятствие, чтобы отслеживать его скорость.
+    observation_persistence: 0.3
+
+    obstacle_range: 3.5
+    raytrace_range: 4.0
+    
+    # Включаем для отладки, чтобы видеть воксельную карту в RViz
+
+    
+  # Настройки для слоя инфляции остаются прежними
+  inflation_layer:
+    inflation_radius: 0.55

@@ -1,0 +1,41 @@
+slam_toolbox:
+  # === ФРЕЙМЫ ===
+  odom_frame: odom
+  map_frame: map
+  base_frame: base_link           # ← ТВОЙ ФРЕЙМ
+  scan_topic: /scan
+
+  # === РЕЖИМ ===
+  mode: mapping                   # или localization
+
+  # === ОДОМЕТРИЯ ===
+  use_odometry: true
+  odom_topic: /shoddy/odom
+
+  # === ФИЛЬТРАЦИЯ ДИНАМИКИ ===
+  use_scan_matching: true
+  do_loop_closing: true
+  loop_closure_search_radius: 10.0
+
+  # === ПАРАМЕТРЫ СКАНИРОВАНИЯ ===
+  minimum_travel_distance: 0.05
+  minimum_travel_heading: 0.05
+  scan_buffer_size: 50
+  scan_buffer_maximum_scan_distance: 10.0
+
+  # === ОПТИМИЗАЦИЯ ===
+  correlation_search_space_size: 0.5
+  correlation_search_space_resolution: 0.01
+  loop_search_space_size: 8.0
+  loop_search_space_resolution: 0.05
+
+  # === ТАЙМИНГИ ===
+  map_update_interval: 1.0
+  resolution: 0.05
+  map_start_size: [100, 100]
+  
+  # ОЧИСТКА:
+  free_space_threshold: 0.20       # ← НИЗКИЙ ПОРОГ (быстрее очищает)
+  occupied_threshold: 0.65           # ← НИЗКИЙ ПОРОГ (не "защёлкивает")
+  probability_of_occupancy: 0.6      # ← НЕ СЛИШКОМ ВЫСОКО!
+  max_laser_range: 5.0

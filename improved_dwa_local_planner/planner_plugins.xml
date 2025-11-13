@@ -1,0 +1,9 @@
+<library path="lib/libimproved_dwa_local_planner_lib">
+  <class name="improved_dwa_local_planner/ImprovedDWALocalPlanner"
+         type="improved_dwa_local_planner::ImprovedDWALocalPlanner"
+         base_class_type="nav_core::BaseLocalPlanner">
+    <description>
+      An implementation of the Dynamic Window Approach that is optimized for dynamic obstacle avoidance as described in the paper.
+    </description>
+  </class>
+</library>
